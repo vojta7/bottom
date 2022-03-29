@@ -20,7 +20,10 @@ use std::{
 };
 
 use crossterm::{
-    event::{poll, read, DisableMouseCapture, Event, KeyCode, KeyEvent, KeyModifiers, MouseEvent},
+    event::{
+        poll, read, DisableMouseCapture, Event, KeyCode, KeyEvent, KeyModifiers, MouseEvent,
+        MouseEventKind,
+    },
     execute,
     style::Print,
     terminal::{disable_raw_mode, LeaveAlternateScreen},
@@ -72,15 +75,15 @@ pub enum ThreadControlEvent {
 }
 
 pub fn handle_mouse_event(event: MouseEvent, app: &mut App) {
-    match event {
-        MouseEvent::ScrollUp(_x, _y, _modifiers) => app.handle_scroll_up(),
-        MouseEvent::ScrollDown(_x, _y, _modifiers) => app.handle_scroll_down(),
-        MouseEvent::Down(button, x, y, _modifiers) => {
+    match event.kind {
+        MouseEventKind::ScrollUp => app.handle_scroll_up(),
+        MouseEventKind::ScrollDown => app.handle_scroll_down(),
+        MouseEventKind::Down(button) => {
             if !app.app_config_fields.disable_click {
                 match button {
                     crossterm::event::MouseButton::Left => {
                         // Trigger left click widget activity
-                        app.on_left_mouse_up(x, y);
+                        app.on_left_mouse_up(event.column, event.row);
                     }
                     crossterm::event::MouseButton::Right => {}
                     _ => {}
